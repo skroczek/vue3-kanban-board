@@ -7,24 +7,16 @@
         placeholder="Add a task"
         @keyup.enter="addTask"
     >
-    <div class="grid grid-cols-3 gap-4 mt-4">
-      <div class="px-3 py-3 bg-gray-100 rounded-lg">
+    <div class="grid gap-4 mt-4" :class="'grid-cols-'+columns.length">
+      <div
+          v-for="(col, index) in columns"
+          :key="index"
+          class="px-3 py-3 bg-gray-100 rounded-lg"
+      >
         <p class="text-sm font-semibold tracking-wide text-gray-700">
-          To-Do
+          {{ col.name }}
         </p>
-        <KanbanColumn :list="todo" @click-close="removeTask($event, todo)" />
-      </div>
-      <div class="px-3 py-3 bg-gray-100 rounded-lg">
-        <p class="text-sm font-semibold tracking-wide text-gray-700">
-          Doing
-        </p>
-        <KanbanColumn :list="doing" @click-close="removeTask($event, doing)" />
-      </div>
-      <div class="px-3 py-3 bg-gray-100 rounded-lg">
-        <p class="text-sm font-semibold tracking-wide text-gray-700">
-          Done
-        </p>
-        <KanbanColumn :list="done" @click-close="removeTask($event, done)" />
+        <KanbanColumn :list="col.cards" :id="col.id" @click-close="removeTask($event, todo)" @update-list="updateList" @done="removeFromList" />
       </div>
     </div>
   </div>
@@ -32,6 +24,8 @@
 
 <script>
 import KanbanColumn from "@/components/KanbanColumn.vue";
+import { mapState, mapActions } from 'vuex'
+import { v4 as uuid4 } from 'uuid'
 
 export default {
   components: {
@@ -40,27 +34,19 @@ export default {
   data() {
     return {
       newTask: '',
-      todo: [
-        {name: 'Todo 1'},
-        {name: 'Todo 2'},
-      ],
-      doing: [],
-      done: [],
     };
   },
+  computed: mapState({
+    columns: state => state.kanban.columns,
+  }),
   methods: {
     addTask() {
       if (this.newTask) {
-        this.todo.push({name: this.newTask});
+        this.addToList({listId: this.columns[0].id, element: {id: uuid4(), name: this.newTask}})
         this.newTask = '';
       }
     },
-    removeTask(task, list) {
-      const index = list.indexOf(task);
-      if (index !== -1) {
-        list.splice(index, 1);
-      }
-    },
+    ...mapActions(['updateList', 'removeFromList', 'addToList'])
   }
 }
 </script>
