@@ -5,6 +5,7 @@
       item-key="id"
       group="task"
       animation="200"
+      :forceFallback="forceFallback"
   >
     <template #item="{element}">
       <div class="flex items-start justify-between px-3 pt-3 pb-5 mt-3 bg-white border border-white rounded shadow">
@@ -45,6 +46,12 @@ export default {
       set(value) {
         this.$emit('updateList', {listId: this.$props.id, list: value})
       }
+    },
+    forceFallback() {
+      return !this.isFirefox;
+    },
+    isFirefox() {
+      return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     }
   },
   emits: ["updateList", "done"]
